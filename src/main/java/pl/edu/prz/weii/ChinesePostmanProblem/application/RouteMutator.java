@@ -17,9 +17,11 @@ public final class RouteMutator<
         >
         extends AbstractAlterer<G, C> {
 
+    private int nodesLength;
 
-    public RouteMutator(double probability) {
+    public RouteMutator(double probability, int nodesLength) {
         super(probability);
+        this.nodesLength = nodesLength;
     }
 
     @Override
@@ -72,9 +74,22 @@ public final class RouteMutator<
 
         // Add/remove Gene from chromosome.
         final double rd = random.nextDouble();
-        if (rd < (p / 2.0)) {
+
+        double shrinkHelp =  ((double)genes.size() / (this.nodesLength * this.nodesLength)) / 100;
+
+        double shrinkProbability = p / 2.0 + shrinkHelp;
+        double growProbability = p ;
+
+        if (genes.size() < this.nodesLength) {
+            shrinkProbability = 0.0;
+            growProbability = 1.0;
+        } else {
+
+        }
+
+        if (rd < shrinkProbability) {
             genes.remove(0);
-        } else if (rd < p) {
+        } else if (rd < growProbability) {
             genes.add(genes.get(0).newInstance());
         }
 

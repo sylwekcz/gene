@@ -15,8 +15,8 @@ public class RouteFinder {
     private Set<Edge> edges = new HashSet<>();
     private Set<Integer> nodes = new HashSet<>();
 
-    private int populationSize = 8;
-    private long limit = 1_000;
+    private int populationSize = 32;
+    private long limit = 100_000;
     private double probabilityOfMutation = 0.25;
 
     public RouteFinder(FileContent fileContent) {
@@ -33,6 +33,7 @@ public class RouteFinder {
 
     private double fitness(final Route route) {
         if (route.isValid()) {
+            System.out.println(route);
             return route.getWeight();
         }
         return Double.MAX_VALUE;
@@ -42,11 +43,11 @@ public class RouteFinder {
         final Engine<IntegerGene, Double> engine = Engine
                 .builder(this::fitness, Route.codec(this.nodes, this.edges))
                 .minimizing()
-                .alterers(new RouteMutator<>(this.probabilityOfMutation))
+                .alterers(new RouteMutator<>(this.probabilityOfMutation, this.nodes.size()))
                 .populationSize(this.populationSize)
                 .build();
 
-        final EvolutionResult<IntegerGene, Double> result = engine.stream().parallel()
+        final EvolutionResult<IntegerGene, Double> result = engine.stream()
                 .limit(this.limit)
                 .collect(EvolutionResult.toBestEvolutionResult());
 

@@ -3,6 +3,7 @@ package pl.edu.prz.weii.ChinesePostmanProblem.application;
 import org.jenetics.Genotype;
 import org.jenetics.IntegerChromosome;
 import org.jenetics.IntegerGene;
+import org.jenetics.NumericGene;
 import org.jenetics.engine.Codec;
 import pl.edu.prz.weii.ChinesePostmanProblem.domain.graph.Edge;
 
@@ -18,10 +19,11 @@ public class Route {
     private Set<Integer> nodes;
     private List<Integer> visitedNodes;
     private List<Edge> visitedEdges;
+    private Double weight;
 
 
     Route(Genotype<IntegerGene> gt, Set<Integer> nodes, Set<Edge> edges) {
-        this.visitedNodes = gt.getChromosome().stream().map(g -> g.intValue()).collect(Collectors.toList());
+        this.visitedNodes = gt.getChromosome().stream().map(NumericGene::intValue).collect(Collectors.toList());
         this.nodes = nodes;
         this.edges = edges;
     }
@@ -35,11 +37,16 @@ public class Route {
         if (this.visitedEdges != null) {
             return this.visitedEdges;
         }
+
+        if (visitedNodes.get(0) != visitedNodes.get(visitedNodes.size() - 1)) {
+            // invalid route
+            return new ArrayList<>();
+        }
+
         List<Edge> visitedEdges = new ArrayList();
+        // check route by edges
         for (int i = 1; i < visitedNodes.size(); i++) {
-            int nodeA = visitedNodes.get(i - 1);
-            int nodeB = visitedNodes.get(i);
-            Edge edge = findEdge(nodeA, nodeB);
+            Edge edge = findEdge(visitedNodes.get(i - 1), visitedNodes.get(i));
             if (edge != null) {
                 visitedEdges.add(edge.copy());
             } else {
@@ -47,6 +54,8 @@ public class Route {
                 return new ArrayList<>();
             }
         }
+
+        this.visitedEdges = visitedEdges;
         return visitedEdges;
     }
 
@@ -69,8 +78,12 @@ public class Route {
         return edges.size() == visitedEdges.size();
     }
 
-    public double getWeight() {
-        return getAsEdges().stream().mapToDouble(Edge::getWeight).sum();
+    public Double getWeight() {
+        if (this.weight != null) {
+            return this.weight;
+        }
+        this.weight = getAsEdges().stream().mapToDouble(Edge::getWeight).sum();
+        return this.weight;
     }
 
     public static Codec<Route, IntegerGene> codec(Set<Integer> nodes, Set<Edge> edges) {
@@ -81,5 +94,12 @@ public class Route {
         );
     }
 
+    @Override
+    public String toString() {
+        return "Route{" +
+                "visitedNodes=" + getVisitedNodes() +
+                ", weight=" + getWeight() +
+                '}';
+    }
 }
 
