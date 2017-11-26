@@ -16,8 +16,7 @@ public class Route {
     private List<Edge> visitedEdges;
     private Double weight;
 
-
-    Route(Genotype<IntegerGene> gt, Set<Edge> edges) {
+    private Route(Genotype<IntegerGene> gt, Set<Edge> edges) {
         this.visitedNodes = gt.getChromosome().stream().map(NumericGene::intValue).collect(Collectors.toList());
         this.edges = edges;
     }
@@ -46,10 +45,6 @@ public class Route {
         return this.visitedEdges;
     }
 
-    public List<Integer> getVisitedNodes() {
-        return visitedNodes;
-    }
-
     private Edge findEdge(int nodeA, int nodeB) {
         for (Edge edge : this.edges) {
             if (edge.equals(nodeA, nodeB)) {
@@ -73,12 +68,8 @@ public class Route {
         return this.weight;
     }
 
-    public static Codec<Route, IntegerGene> code(Set<Integer> nodes, Set<Edge> edges) {
-        int min = nodes.stream().mapToInt(Integer::intValue).min().getAsInt();
-        return Codec.of(
-                Genotype.of(IntegerChromosome.of(min, nodes.size() + min - 1, nodes.size())),
-                gt -> new Route(gt, edges)
-        );
+    public List<Integer> getVisitedNodes() {
+        return visitedNodes;
     }
 
     @Override
@@ -87,6 +78,14 @@ public class Route {
                 "visitedNodes=" + getVisitedNodes() +
                 ", weight=" + getWeight() +
                 '}';
+    }
+
+    public static Codec<Route, IntegerGene> code(Set<Integer> nodes, Set<Edge> edges) {
+        int min = nodes.stream().mapToInt(Integer::intValue).min().getAsInt();
+        return Codec.of(
+                Genotype.of(IntegerChromosome.of(min, nodes.size() + min - 1, nodes.size())),
+                gt -> new Route(gt, edges)
+        );
     }
 }
 
