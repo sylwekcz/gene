@@ -32,12 +32,10 @@ public final class RouteMutator<
         final IntRef alterations = new IntRef(0);
         // mutate random population
         indexes(RandomRegistry.getRandom(), population.size(), _probability).forEach(i -> {
-            final Phenotype<G, C> pt = population.get(i);
-            final Genotype<G> gt = pt.getGenotype();
-            final Genotype<G> mgt = mutate(gt, alterations);
-
-            final Phenotype<G, C> mpt = pt.newInstance(mgt, generation);
-            population.set(i, mpt);
+            final Phenotype<G, C> oldPhenotype = population.get(i);
+            final Genotype<G> newGenotype = mutate(oldPhenotype.getGenotype(), alterations);
+            final Phenotype<G, C> newPhenotype = oldPhenotype.newInstance(newGenotype, generation);
+            population.set(i, newPhenotype);
         });
         return alterations.value;
     }
@@ -68,10 +66,10 @@ public final class RouteMutator<
         // Add/remove Gene from chromosome.
         final double rd = random.nextDouble();
 
-        double shrinkHelp =  ((double)genes.size() / (this.nodesLength * this.nodesLength)) / 100;
+        double shrinkHelp = ((double) genes.size() / (this.nodesLength * this.nodesLength)) / 100;
 
         double shrinkProbability = _probability / 2.0 + shrinkHelp;
-        double growProbability = _probability ;
+        double growProbability = _probability;
 
         if (genes.size() < this.nodesLength) {
             shrinkProbability = 0.0;

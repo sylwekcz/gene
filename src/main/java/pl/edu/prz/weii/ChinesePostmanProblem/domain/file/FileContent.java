@@ -2,13 +2,12 @@ package pl.edu.prz.weii.ChinesePostmanProblem.domain.file;
 
 import pl.edu.prz.weii.ChinesePostmanProblem.domain.graph.Edge;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-    public class FileContent {
+public class FileContent {
 
     private int numberOfEdges;
     private Set<Edge> edges = new HashSet<>();
@@ -21,7 +20,7 @@ import java.util.stream.Collectors;
                 }
         );
 
-        if(numberOfEdges != edges.size()){
+        if (numberOfEdges != edges.size()) {
             throw new IllegalArgumentException("File number of edges does not match with edges size");
         }
     }

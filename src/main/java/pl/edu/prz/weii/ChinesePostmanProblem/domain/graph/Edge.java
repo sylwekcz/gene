@@ -5,7 +5,7 @@ import org.jenetics.util.Copyable;
 
 import java.io.Serializable;
 
-public class Edge implements Serializable, Copyable<Edge>{
+public class Edge implements Serializable, Copyable<Edge> {
 
     private int nodeA;
     private int nodeB;
@@ -20,12 +20,12 @@ public class Edge implements Serializable, Copyable<Edge>{
         this.weightFromBToA = Double.parseDouble(weightFromBToA);
     }
 
-    public Edge(int nodeA, int nodeB, double weightFromAToB, double weightFromBToA, boolean atoB) {
+    public Edge(int nodeA, int nodeB, double weightFromAToB, double weightFromBToA, boolean AtoB) {
         this.nodeA = nodeA;
         this.nodeB = nodeB;
         this.weightFromAToB = weightFromAToB;
         this.weightFromBToA = weightFromBToA;
-        AtoB = atoB;
+        this.AtoB = AtoB;
     }
 
     public int getNodeA() {
@@ -48,10 +48,6 @@ public class Edge implements Serializable, Copyable<Edge>{
         return AtoB;
     }
 
-    public void setAtoB(boolean atoB) {
-        AtoB = atoB;
-    }
-
     public double getWeight() {
         if (AtoB) {
             return weightFromAToB;
@@ -60,18 +56,16 @@ public class Edge implements Serializable, Copyable<Edge>{
         }
     }
 
-    public boolean isEdge(int nodeA, int nodeB){
-        if(this.nodeA == nodeA && this.nodeB == nodeB){
+    public boolean equals(int nodeA, int nodeB) {
+        if (this.nodeA == nodeA && this.nodeB == nodeB) {
             this.AtoB = true;
             return true;
-        } else if (this.nodeB == nodeA && this.nodeA == nodeB){
+        } else if (this.nodeB == nodeA && this.nodeA == nodeB) {
             this.AtoB = false;
             return true;
         }
         return false;
     }
-
-
 
     @Override
     public boolean equals(Object o) {
