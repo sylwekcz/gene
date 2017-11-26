@@ -1,11 +1,10 @@
-package pl.edu.prz.weii.ChinesePostmanProblem.application;
+package pl.edu.prz.weii.ChinesePostmanProblem.domain.graph;
 
 import org.jenetics.Genotype;
 import org.jenetics.IntegerChromosome;
 import org.jenetics.IntegerGene;
 import org.jenetics.NumericGene;
 import org.jenetics.engine.Codec;
-import pl.edu.prz.weii.ChinesePostmanProblem.domain.graph.Edge;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -26,11 +25,6 @@ public class Route {
         this.visitedNodes = gt.getChromosome().stream().map(NumericGene::intValue).collect(Collectors.toList());
         this.nodes = nodes;
         this.edges = edges;
-    }
-
-    Route(Set<Edge> edges, List<Integer> visitedNodes) {
-        this.edges = edges;
-        this.visitedNodes = visitedNodes;
     }
 
     public List<Edge> getAsEdges() {
@@ -65,7 +59,7 @@ public class Route {
 
     private Edge findEdge(int nodeA, int nodeB) {
         for (Edge edge : this.edges) {
-            if (edge.isNode(nodeA, nodeB)) {
+            if (edge.isEdge(nodeA, nodeB)) {
                 return edge;
             }
         }

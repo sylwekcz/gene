@@ -60,7 +60,7 @@ public class Edge implements Serializable, Copyable<Edge>{
         }
     }
 
-    public boolean isNode(int nodeA, int nodeB){
+    public boolean isEdge(int nodeA, int nodeB){
         if(this.nodeA == nodeA && this.nodeB == nodeB){
             this.AtoB = true;
             return true;

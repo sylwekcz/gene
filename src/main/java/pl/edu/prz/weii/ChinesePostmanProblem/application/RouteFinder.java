@@ -6,6 +6,7 @@ import org.jenetics.engine.Engine;
 import org.jenetics.engine.EvolutionResult;
 import pl.edu.prz.weii.ChinesePostmanProblem.domain.file.FileContent;
 import pl.edu.prz.weii.ChinesePostmanProblem.domain.graph.Edge;
+import pl.edu.prz.weii.ChinesePostmanProblem.domain.graph.Route;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -33,7 +34,7 @@ public class RouteFinder {
 
     private double fitness(final Route route) {
         if (route.isValid()) {
-            System.out.println(route);
+//            System.out.println(route);
             return route.getWeight();
         }
         return Double.MAX_VALUE;

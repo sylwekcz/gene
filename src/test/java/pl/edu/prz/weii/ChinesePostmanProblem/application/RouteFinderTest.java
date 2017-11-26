@@ -2,6 +2,7 @@ package pl.edu.prz.weii.ChinesePostmanProblem.application;
 
 import org.junit.Test;
 import pl.edu.prz.weii.ChinesePostmanProblem.domain.file.FileContent;
+import pl.edu.prz.weii.ChinesePostmanProblem.domain.graph.Route;
 
 import java.util.Arrays;
 
