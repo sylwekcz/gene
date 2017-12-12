@@ -22,8 +22,8 @@ public class GraphGenerator {
         for (int i = 1; i < vertexCount; i++)
             for (int j = 0; j < i; j++)
                 if (rand.nextInt(100) < saturation) {
-                    result[i][j] = 1;
-                    result[j][i] = 1;
+                    result[i][j] = weightSupplier.get();
+                    result[j][i] = weightSupplier.get();
                 }
 
         if (euler) {
@@ -71,11 +71,15 @@ public class GraphGenerator {
      */
     public static void main(String[] args) {
         int vertexCount = 5;
-        List<Edge> edges = genGraph(vertexCount, 50, true, () -> 1.0);
+        List<Edge> edges = genGraph(vertexCount, 50, false,  GraphGenerator::generateDoubleBetween1and10);
         System.out.println("Edges:");
         System.out.println(edges.size());
         edges.forEach(System.out::println);
 
+    }
+
+    public static double generateDoubleBetween1and10(){
+        return (double) new Random().nextInt(10) + 1.0;
     }
 
 }
