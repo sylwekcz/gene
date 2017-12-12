@@ -20,6 +20,13 @@ public class Edge implements Serializable, Copyable<Edge> {
         this.weightFromBToA = Double.parseDouble(weightFromBToA);
     }
 
+    public Edge(int nodeA, int nodeB, double weightFromAToB, double weightFromBToA) {
+        this.nodeA = nodeA;
+        this.nodeB = nodeB;
+        this.weightFromAToB = weightFromAToB;
+        this.weightFromBToA = weightFromBToA;
+    }
+
     public Edge(int nodeA, int nodeB, double weightFromAToB, double weightFromBToA, boolean AtoB) {
         this.nodeA = nodeA;
         this.nodeB = nodeB;
@@ -94,12 +101,12 @@ public class Edge implements Serializable, Copyable<Edge> {
     }
 
     @Override
-    public String toString() {
-        return "(" + nodeA + "," + nodeB + ")";
+    public Edge copy() {
+        return new Edge(nodeA, nodeB, weightFromAToB, weightFromBToA, AtoB);
     }
 
     @Override
-    public Edge copy() {
-        return new Edge(nodeA, nodeB, weightFromAToB, weightFromBToA, AtoB);
+    public String toString() {
+        return nodeA + " " + nodeB + " " + weightFromAToB + " " + weightFromBToA;
     }
 }
