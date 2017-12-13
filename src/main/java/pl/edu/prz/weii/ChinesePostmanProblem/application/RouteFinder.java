@@ -54,8 +54,9 @@ public class RouteFinder {
             if (!route.isStartingAndEndingOnSameNode()) {
                 score += penalty;
             }
+        } else {
+            System.out.println(route);
         }
-//        System.out.println(route.isValid() + " " + route.getVisitedNodes());
         return score;
     }
 
