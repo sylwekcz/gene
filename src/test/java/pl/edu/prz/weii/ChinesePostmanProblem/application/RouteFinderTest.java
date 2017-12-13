@@ -20,9 +20,8 @@ public class RouteFinderTest {
     public void test() {
         RouteFinder routeFinder = new RouteFinder(fileContent);
         Route best = routeFinder.findBest();
-        System.out.println(best.getVisitedEdges());
-        System.out.println(best.getVisitedNodes());
-        System.out.println(best.getWeight());
+        System.out.println(best);
+        System.out.println(routeFinder.fitness(best));
         assertEquals(37.0, best.getWeight(), 0.0);
     }
 

@@ -74,6 +74,10 @@ public class Edge implements Serializable, Copyable<Edge> {
         return false;
     }
 
+    public void printLikeFileLine() {
+        System.out.println(nodeA + " " + nodeB + " " + weightFromAToB + " " + weightFromBToA);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -107,6 +111,7 @@ public class Edge implements Serializable, Copyable<Edge> {
 
     @Override
     public String toString() {
-        return nodeA + " " + nodeB + " " + weightFromAToB + " " + weightFromBToA;
+        String arrow = "%d -> %d";
+        return AtoB ? String.format(arrow, nodeA, nodeB) : String.format(arrow, nodeB, nodeA);
     }
 }

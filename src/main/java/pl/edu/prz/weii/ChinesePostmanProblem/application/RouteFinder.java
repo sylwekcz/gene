@@ -9,6 +9,7 @@ import pl.edu.prz.weii.ChinesePostmanProblem.domain.graph.Edge;
 import pl.edu.prz.weii.ChinesePostmanProblem.domain.graph.Route;
 
 import java.util.HashSet;
+import java.util.OptionalDouble;
 import java.util.Set;
 
 import static org.jenetics.engine.limit.bySteadyFitness;
@@ -17,18 +18,26 @@ public class RouteFinder {
 
     private Set<Edge> edges = new HashSet<>();
     private Set<Integer> nodes = new HashSet<>();
+    private double maxWeight = Double.MAX_VALUE;
 
-    private int populationSize = 150;
-    private long limitIterations = 100_000_000;
-    private int limitSteady = 10_000;
-    private double probabilityOfMutation = 0.3;
+    private int populationSize = 10;
+    private long limitIterations = 5_000_000;
+    private int limitSteady = 50_000;
+    private double probabilityOfMutation = 0.5;
 
     public RouteFinder(FileContent fileContent) {
         this.edges = fileContent.getEdges();
         this.nodes = fileContent.getNodes();
+
+        OptionalDouble maxWeightAtoB = this.edges.stream().mapToDouble(Edge::getWeightFromAToB).max();
+        OptionalDouble maxWeightBtoA = this.edges.stream().mapToDouble(Edge::getWeightFromBToA).max();
+        this.maxWeight = Math.max(
+                maxWeightAtoB.isPresent() ? maxWeightAtoB.getAsDouble() : Double.MAX_VALUE,
+                maxWeightBtoA.isPresent() ? maxWeightBtoA.getAsDouble() : Double.MAX_VALUE
+        );
     }
 
-    public RouteFinder(FileContent fileContent, int populationSize, long limitIterations, int limitSteady,  double probabilityOfMutation) {
+    public RouteFinder(FileContent fileContent, int populationSize, long limitIterations, int limitSteady, double probabilityOfMutation) {
         this(fileContent);
         this.populationSize = populationSize;
         this.limitIterations = limitIterations;
@@ -36,12 +45,18 @@ public class RouteFinder {
         this.probabilityOfMutation = probabilityOfMutation;
     }
 
-    private double fitness(final Route route) {
-        if (route.isValid()) {
-            System.out.println(route);
-            return route.getWeight();
+    public double fitness(final Route route) {
+        double score = route.getWeight();
+        double penalty = maxWeight * 10;
+        if (!route.isValid()) {
+            score += (route.getNotVisitedEdges() * penalty);
+            score += (route.getIncorrectEdges() * penalty);
+            if (!route.isStartingAndEndingOnSameNode()) {
+                score += penalty;
+            }
         }
-        return Double.MAX_VALUE;
+//        System.out.println(route.isValid() + " " + route.getVisitedNodes());
+        return score;
     }
 
     public Route findBest() {

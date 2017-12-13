@@ -66,8 +66,8 @@ public final class RouteMutator<
         // Add/remove Gene from chromosome.
         final double rd = random.nextDouble();
 
-        double shrinkHelp = ((double) genes.size() / (this.nodesLength * this.nodesLength)) / 100;
-
+//        double shrinkHelp = ((double) genes.size() / (this.nodesLength * this.nodesLength)) / 100;
+        double shrinkHelp = 0;
         double shrinkProbability = _probability / 2.0 + shrinkHelp;
         double growProbability = _probability;
 

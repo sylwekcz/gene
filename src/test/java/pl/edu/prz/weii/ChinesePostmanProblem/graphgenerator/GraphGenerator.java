@@ -70,11 +70,11 @@ public class GraphGenerator {
      * @param args
      */
     public static void main(String[] args) {
-        int vertexCount = 5;
-        List<Edge> edges = genGraph(vertexCount, 50, false,  GraphGenerator::generateDoubleBetween1and10);
+        int vertexCount = 50;
+        List<Edge> edges = genGraph(vertexCount, 100, false,  () -> 1.0);
         System.out.println("Edges:");
         System.out.println(edges.size());
-        edges.forEach(System.out::println);
+        edges.forEach(Edge::printLikeFileLine);
 
     }
 

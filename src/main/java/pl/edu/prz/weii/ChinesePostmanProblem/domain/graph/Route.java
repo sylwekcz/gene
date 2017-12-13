@@ -6,95 +6,53 @@ import org.jenetics.IntegerGene;
 import org.jenetics.NumericGene;
 import org.jenetics.engine.Codec;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Route {
 
-    private Set<Edge> edges;
     private List<Integer> visitedNodes;
     private List<Edge> correctlyVisitedEdges;
-    private Double weight;
-    private Boolean startsAndEndsOnSameNode;
-    private Boolean allEdgesVisited;
-    private Integer omittedEdges;
+    private int incorrectEdges;
+    private int notVisitedEdges;
+    private boolean startingAndEndingOnSameNode;
+    private boolean valid;
+    private double weight;
 
     private Route(Genotype<IntegerGene> gt, Set<Edge> edges) {
-        this.visitedNodes = gt.getChromosome().stream().map(NumericGene::intValue).collect(Collectors.toList());
-        this.edges = edges;
-    }
-
-    public List<Edge> getCorrectlyVisitedEdges() {
-        if (this.correctlyVisitedEdges == null) {
-            // check and build route of edges from nodes route
-            List<Edge> correctlyVisitedEdges = new ArrayList<>();
-            for (int i = 1; i < this.visitedNodes.size(); ++i) {
-                Edge edge = findEdge(this.visitedNodes.get(i - 1), this.visitedNodes.get(i));
-                if (edge != null) {
-                    correctlyVisitedEdges.add(edge.copy());
-                } else {
-                    break;
-                }
+        visitedNodes = gt.getChromosome().stream().map(NumericGene::intValue).collect(Collectors.toList());
+        correctlyVisitedEdges = new ArrayList<>();
+        incorrectEdges = 0;
+        for (int i = 1; i < visitedNodes.size(); ++i) {
+            Edge edge = findEdge(edges, visitedNodes.get(i - 1), visitedNodes.get(i));
+            if (edge != null) {
+                correctlyVisitedEdges.add(edge);
+            } else {
+                ++incorrectEdges;
             }
-            this.correctlyVisitedEdges = correctlyVisitedEdges;
         }
-        return this.correctlyVisitedEdges;
+        if (correctlyVisitedEdges.size() > 1) {
+            Edge firstEdge = correctlyVisitedEdges.get(0);
+            Edge lastEdge = correctlyVisitedEdges.get(correctlyVisitedEdges.size() - 1);
+            int firstNode = firstEdge.isAtoB() ? firstEdge.getNodeA() : firstEdge.getNodeB();
+            int lastNode = lastEdge.isAtoB() ? lastEdge.getNodeB() : lastEdge.getNodeA();
+            startingAndEndingOnSameNode = firstNode == lastNode;
+        }
+        notVisitedEdges = edges.size() - new HashSet<>(correctlyVisitedEdges).size();
+        valid = startingAndEndingOnSameNode && (notVisitedEdges == 0) && (incorrectEdges == 0);
+        weight = correctlyVisitedEdges.stream().mapToDouble(Edge::getWeight).sum();
     }
 
-    private Edge findEdge(int nodeA, int nodeB) {
-        for (Edge edge : this.edges) {
+    private Edge findEdge(Set<Edge> edges, int nodeA, int nodeB) {
+        for (Edge edge : edges) {
             if (edge.equals(nodeA, nodeB)) {
-                return edge;
+                return edge.copy();
             }
         }
         return null;
-    }
-
-    public boolean startsAndEndsOnSameNode(){
-        if (this.startsAndEndsOnSameNode == null) {
-            this.startsAndEndsOnSameNode = this.visitedNodes.get(0).equals(this.visitedNodes.get(this.visitedNodes.size() - 1));
-        }
-        return this.startsAndEndsOnSameNode;
-    }
-
-    public boolean allEdgesVisited(){
-        if (this.allEdgesVisited == null) {
-            // filter duplicates
-            Set<Edge> visitedEdges = new HashSet<>(getCorrectlyVisitedEdges());
-            this.omittedEdges = this.edges.size() - visitedEdges.size();
-            this.allEdgesVisited = this.edges.size() == visitedEdges.size();
-        }
-        return this.allEdgesVisited;
-    }
-
-    public boolean isValid() {
-        return allEdgesVisited() && startsAndEndsOnSameNode();
-    }
-
-    public Double getWeight() {
-        if (this.weight == null) {
-            this.weight = getCorrectlyVisitedEdges().stream().mapToDouble(Edge::getWeight).sum();
-        }
-        return this.weight;
-    }
-
-    public Integer getOmittedEdges() {
-        if (this.omittedEdges == null) {
-            allEdgesVisited();
-        }
-        return this.omittedEdges;
-    }
-
-    public List<Integer> getVisitedNodes() {
-        return visitedNodes;
-    }
-
-    @Override
-    public String toString() {
-        return "Route{" +
-                "visitedNodes=" + getVisitedNodes() +
-                ", weight=" + getWeight() +
-                '}';
     }
 
     public static Codec<Route, IntegerGene> code(Set<Integer> nodes, Set<Edge> edges) {
@@ -103,6 +61,76 @@ public class Route {
                 Genotype.of(IntegerChromosome.of(min, nodes.size() + min - 1, nodes.size())),
                 gt -> new Route(gt, edges)
         );
+    }
+
+    public List<Integer> getVisitedNodes() {
+        return visitedNodes;
+    }
+
+    public void setVisitedNodes(List<Integer> visitedNodes) {
+        this.visitedNodes = visitedNodes;
+    }
+
+    public List<Edge> getCorrectlyVisitedEdges() {
+        return correctlyVisitedEdges;
+    }
+
+    public void setCorrectlyVisitedEdges(List<Edge> correctlyVisitedEdges) {
+        this.correctlyVisitedEdges = correctlyVisitedEdges;
+    }
+
+    public int getIncorrectEdges() {
+        return incorrectEdges;
+    }
+
+    public void setIncorrectEdges(int incorrectEdges) {
+        this.incorrectEdges = incorrectEdges;
+    }
+
+    public int getNotVisitedEdges() {
+        return notVisitedEdges;
+    }
+
+    public void setNotVisitedEdges(int notVisitedEdges) {
+        this.notVisitedEdges = notVisitedEdges;
+    }
+
+    public boolean isStartingAndEndingOnSameNode() {
+        return startingAndEndingOnSameNode;
+    }
+
+    public void setStartingAndEndingOnSameNode(boolean startingAndEndingOnSameNode) {
+        this.startingAndEndingOnSameNode = startingAndEndingOnSameNode;
+    }
+
+    public boolean isValid() {
+        return valid;
+    }
+
+    public void setValid(boolean valid) {
+        this.valid = valid;
+    }
+
+    public double getWeight() {
+        return weight;
+    }
+
+    public void setWeight(double weight) {
+        this.weight = weight;
+    }
+
+
+    @Override
+    public String toString() {
+        return "Route{" +
+                "visitedNodes=" + visitedNodes +
+                ", correctlyVisitedEdges=" + correctlyVisitedEdges +
+                ", incorrectEdges=" + incorrectEdges +
+                ", notVisitedEdges=" + notVisitedEdges +
+                ", startingAndEndingOnSameNode=" + startingAndEndingOnSameNode +
+                ", valid=" + valid +
+                ", weight=" + weight +
+                '}';
     }
 }
 
