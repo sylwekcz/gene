@@ -67,58 +67,29 @@ public class Route {
         return visitedNodes;
     }
 
-    public void setVisitedNodes(List<Integer> visitedNodes) {
-        this.visitedNodes = visitedNodes;
-    }
-
     public List<Edge> getCorrectlyVisitedEdges() {
         return correctlyVisitedEdges;
-    }
-
-    public void setCorrectlyVisitedEdges(List<Edge> correctlyVisitedEdges) {
-        this.correctlyVisitedEdges = correctlyVisitedEdges;
     }
 
     public int getIncorrectEdges() {
         return incorrectEdges;
     }
 
-    public void setIncorrectEdges(int incorrectEdges) {
-        this.incorrectEdges = incorrectEdges;
-    }
-
     public int getNotVisitedEdges() {
         return notVisitedEdges;
-    }
-
-    public void setNotVisitedEdges(int notVisitedEdges) {
-        this.notVisitedEdges = notVisitedEdges;
     }
 
     public boolean isStartingAndEndingOnSameNode() {
         return startingAndEndingOnSameNode;
     }
 
-    public void setStartingAndEndingOnSameNode(boolean startingAndEndingOnSameNode) {
-        this.startingAndEndingOnSameNode = startingAndEndingOnSameNode;
-    }
-
     public boolean isValid() {
         return valid;
-    }
-
-    public void setValid(boolean valid) {
-        this.valid = valid;
     }
 
     public double getWeight() {
         return weight;
     }
-
-    public void setWeight(double weight) {
-        this.weight = weight;
-    }
-
 
     @Override
     public String toString() {
