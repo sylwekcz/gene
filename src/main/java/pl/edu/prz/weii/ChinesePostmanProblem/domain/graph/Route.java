@@ -59,12 +59,12 @@ public class Route {
         return null;
     }
 
-    public static Codec<Route, IntegerGene> code(Set<Integer> nodes, Set<Edge> edges, int chromosomesLength) {
+    public static Codec<Route, IntegerGene> code(Set<Integer> nodes, Set<Edge> edges, int chromosomesCount, int chromosomeLength) {
         int min = nodes.stream().mapToInt(Integer::intValue).min().getAsInt();
-        IntegerChromosome randomChromosome = IntegerChromosome.of(min, nodes.size() + min - 1, nodes.size());
+        IntegerChromosome randomChromosome = IntegerChromosome.of(min, nodes.size() + min - 1, chromosomeLength);
         List<IntegerChromosome> chromosomes = new ArrayList<>();
         chromosomes.add(randomChromosome);
-        for (int i = 1; i <chromosomesLength ; i++) {
+        for (int i = 1; i <chromosomesCount ; i++) {
             chromosomes.add(randomChromosome);
         }
         return Codec.of(

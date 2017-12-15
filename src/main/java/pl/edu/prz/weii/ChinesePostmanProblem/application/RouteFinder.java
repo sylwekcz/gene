@@ -19,11 +19,12 @@ public class RouteFinder {
     private Set<Integer> nodes = new HashSet<>();
     private double maxWeight = Double.MAX_VALUE;
 
-    private int startChromosomeLenght = 10;
-    private int populationSize = 100;
+    private int startChromosomeCount = 20;
+    private int startChromosomeLength = 5;
+    private int populationSize = 1000;
     private long limitIterations = 1_000_000L;
     private int limitSteady = 100_000;
-    private double probabilityOfMutation = 0.1;
+    private double probabilityOfMutation = 0.001;
 
 
     private double prevBestScore = Double.MAX_VALUE;
@@ -71,7 +72,7 @@ public class RouteFinder {
     public Route findBest() {
         startTime = System.currentTimeMillis();
         final Engine<IntegerGene, Double> engine = Engine
-                .builder(this::fitness, Route.code(this.nodes, this.edges, startChromosomeLenght))
+                .builder(this::fitness, Route.code(this.nodes, this.edges, startChromosomeCount, startChromosomeLength))
                 .minimizing()
                 .alterers(new RouteMutator<>(this.probabilityOfMutation, this.nodes.size()))
                 .offspringSelector(new TruncationSelector<>())
@@ -84,7 +85,7 @@ public class RouteFinder {
                 .limit(this.limitIterations)
                 .collect(EvolutionResult.toBestEvolutionResult());
         Genotype<IntegerGene> genotype = result.getBestPhenotype().getGenotype();
-        return Route.code(this.nodes, this.edges, startChromosomeLenght).decoder().apply(genotype);
+        return Route.code(this.nodes, this.edges, startChromosomeCount, startChromosomeLength).decoder().apply(genotype);
     }
 
 }
