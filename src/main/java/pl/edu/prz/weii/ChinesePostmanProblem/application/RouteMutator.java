@@ -1,6 +1,8 @@
 package pl.edu.prz.weii.ChinesePostmanProblem.application;
 
 import org.jenetics.*;
+import org.jenetics.engine.Engine;
+import org.jenetics.engine.EvolutionResult;
 import org.jenetics.internal.util.IntRef;
 import org.jenetics.util.ISeq;
 import org.jenetics.util.RandomRegistry;
@@ -29,62 +31,73 @@ public final class RouteMutator<
             final Population<G, C> population,
             final long generation
     ) {
+        final double p = Math.pow(_probability, 1.0 / 3.0);
         final IntRef alterations = new IntRef(0);
-        // mutate random population
-        indexes(RandomRegistry.getRandom(), population.size(), _probability).forEach(i -> {
-            final Phenotype<G, C> oldPhenotype = population.get(i);
-            final Genotype<G> newGenotype = mutate(oldPhenotype.getGenotype(), alterations);
-            final Phenotype<G, C> newPhenotype = oldPhenotype.newInstance(newGenotype, generation);
-            population.set(i, newPhenotype);
+
+        indexes(RandomRegistry.getRandom(), population.size(), p).forEach(i -> {
+            final Phenotype<G, C> pt = population.get(i);
+
+            final Genotype<G> gt = pt.getGenotype();
+            final Genotype<G> mgt = mutate(gt, p, alterations);
+
+            final Phenotype<G, C> mpt = pt.newInstance(mgt, generation);
+            population.set(i, mpt);
         });
+
         return alterations.value;
     }
 
-    // mutate genotype
     private Genotype<G> mutate(
             final Genotype<G> genotype,
+            final double p,
             final IntRef alterations
     ) {
         final List<Chromosome<G>> chromosomes =
                 new ArrayList<>(genotype.toSeq().asList());
 
-        if (chromosomes.size() != 1) {
-            throw new IllegalArgumentException("Should only have one chromosome!");
-        } else {
-
-            final List<G> genes = new ArrayList<>(chromosomes.get(0).toSeq().asList());
-            alterations.value = mutate(genes);
-            chromosomes.set(0, chromosomes.get(0).newInstance(ISeq.of(genes)));
+        // Add/remove Chromosome to Genotype.
+        final Random random = RandomRegistry.getRandom();
+        final double rd = random.nextDouble();
+        if (rd < 1 / 3.0 && chromosomes.size() > 1) {
+            chromosomes.remove(0);
+        } else if (rd < 2 / 3.0) {
+            chromosomes.add(chromosomes.get(0).newInstance());
         }
+
+        alterations.value +=
+                indexes(RandomRegistry.getRandom(), chromosomes.size(), p)
+                        .map(i -> mutate(chromosomes, i, p))
+                        .sum();
+
         return Genotype.of(chromosomes);
     }
 
-    // mutate chromosome genes
-    private int mutate(final List<G> genes) {
+    private int mutate(final List<Chromosome<G>> c, final int i, final double p) {
+        final Chromosome<G> chromosome = c.get(i);
+        final List<G> genes = new ArrayList<>(chromosome.toSeq().asList());
+
+        final int mutations = mutate(genes, p);
+        if (mutations > 0) {
+            c.set(i, chromosome.newInstance(ISeq.of(genes)));
+        }
+        return mutations;
+    }
+
+    private int mutate(final List<G> genes, final double p) {
         final Random random = RandomRegistry.getRandom();
 
         // Add/remove Gene from chromosome.
         final double rd = random.nextDouble();
-
-//        double shrinkHelp = ((double) genes.size() / (this.nodesLength * this.nodesLength)) / 100;
-        double shrinkHelp = 0;
-        double shrinkProbability = _probability / 2.0 + shrinkHelp;
-        double growProbability = _probability;
-
-        if (genes.size() < this.nodesLength) {
-            shrinkProbability = 0.0;
-            growProbability = 1.0;
+        if (rd < 1 / 3.0) {
+            genes.remove(0);
+        } else if (rd < 2 / 3.0) {
+            genes.add(genes.get(0).newInstance());
         }
 
-        int penultimateGeneIndex = genes.size() - 2;
-        if (rd < shrinkProbability) {
-            genes.remove(penultimateGeneIndex);
-        } else if (rd < growProbability) {
-            genes.add(penultimateGeneIndex, genes.get(0).newInstance());
-        }
-        return (int) indexes(random, 1, genes.size() - 1, _probability)
+        return (int) indexes(random, genes.size(), p)
                 .peek(i -> genes.set(i, genes.get(i).newInstance()))
                 .count();
     }
+
 
 }

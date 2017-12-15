@@ -2,13 +2,11 @@ package pl.edu.prz.weii.ChinesePostmanProblem.domain.graph;
 
 import org.jenetics.*;
 import org.jenetics.engine.Codec;
-import org.jenetics.util.ISeq;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class Route {
 
@@ -17,13 +15,19 @@ public class Route {
     private int incorrectEdges;
     private int notVisitedEdges;
     private boolean startingAndEndingOnSameNode;
-    private boolean valid;
     private double weight;
+    private boolean valid;
+
 
     private Route(Genotype<IntegerGene> gt, Set<Edge> edges) {
-        visitedNodes = gt.getChromosome().stream().map(NumericGene::intValue).collect(Collectors.toList());
+        visitedNodes = new ArrayList<>();
         correctlyVisitedEdges = new ArrayList<>();
         incorrectEdges = 0;
+        gt.iterator().forEachRemaining(chromosome -> chromosome.iterator().forEachRemaining(
+                gene -> {
+                    visitedNodes.add(gene.intValue());
+                }
+        ));
         for (int i = 1; i < visitedNodes.size(); ++i) {
             Edge edge = findEdge(edges, visitedNodes.get(i - 1), visitedNodes.get(i));
             if (edge != null) {
@@ -35,35 +39,36 @@ public class Route {
         if (correctlyVisitedEdges.size() > 1) {
             Edge firstEdge = correctlyVisitedEdges.get(0);
             Edge lastEdge = correctlyVisitedEdges.get(correctlyVisitedEdges.size() - 1);
-//            int firstNode = firstEdge.isAtoB() ? firstEdge.getNodeA() : firstEdge.getNodeB();
-//            int lastNode = lastEdge.isAtoB() ? lastEdge.getNodeB() : lastEdge.getNodeA();
-//            startingAndEndingOnSameNode = firstNode == lastNode;
-            startingAndEndingOnSameNode = visitedNodes.get(0) == visitedNodes.get(visitedNodes.size() - 1);
+            int firstNode = firstEdge.isAtoB() ? firstEdge.getNodeA() : firstEdge.getNodeB();
+            int lastNode = lastEdge.isAtoB() ? lastEdge.getNodeB() : lastEdge.getNodeA();
+            startingAndEndingOnSameNode = firstNode == lastNode;
         }
-        notVisitedEdges = edges.size() - new HashSet<>(correctlyVisitedEdges).size();
+        HashSet<Edge> edges1 = new HashSet<>(correctlyVisitedEdges);
+             notVisitedEdges =  edges.size() -  new HashSet<>(correctlyVisitedEdges).size();
         valid = startingAndEndingOnSameNode && (notVisitedEdges == 0) && (incorrectEdges == 0);
         weight = correctlyVisitedEdges.stream().mapToDouble(Edge::getWeight).sum();
     }
 
     private Edge findEdge(Set<Edge> edges, int nodeA, int nodeB) {
         for (Edge edge : edges) {
-            if (edge.equals(nodeA, nodeB)) {
-                return edge.copy();
+            Edge foundEdge = edge.ifEqualsReturnCopyWithProperDirection(nodeA, nodeB);
+            if (foundEdge != null) {
+                return foundEdge;
             }
         }
         return null;
     }
 
-    public static Codec<Route, IntegerGene> code(Set<Integer> nodes, Set<Edge> edges) {
+    public static Codec<Route, IntegerGene> code(Set<Integer> nodes, Set<Edge> edges, int chromosomesLength) {
         int min = nodes.stream().mapToInt(Integer::intValue).min().getAsInt();
-
         IntegerChromosome randomChromosome = IntegerChromosome.of(min, nodes.size() + min - 1, nodes.size());
-        ISeq<IntegerGene> integerGenes = randomChromosome.toSeq();
-        ISeq<IntegerGene> integerGenesStartAndAndOnSame = integerGenes.append(integerGenes.get(0));
-        IntegerChromosome initChromosome = randomChromosome.newInstance(integerGenesStartAndAndOnSame);
-        System.out.println("code");
+        List<IntegerChromosome> chromosomes = new ArrayList<>();
+        chromosomes.add(randomChromosome);
+        for (int i = 1; i <chromosomesLength ; i++) {
+            chromosomes.add(randomChromosome);
+        }
         return Codec.of(
-                Genotype.of(initChromosome),
+                Genotype.of(chromosomes),
                 gt -> new Route(gt, edges)
         );
     }
@@ -99,10 +104,12 @@ public class Route {
     @Override
     public String toString() {
         return "Route{" +
-                "incorrectEdges=" + incorrectEdges +
+                "valid=" + valid +
+                ", visitedNodes=" + visitedNodes +
+                ", correctlyVisitedEdges=" + correctlyVisitedEdges +
+                ", incorrectEdges=" + incorrectEdges +
                 ", notVisitedEdges=" + notVisitedEdges +
                 ", startingAndEndingOnSameNode=" + startingAndEndingOnSameNode +
-                ", valid=" + valid +
                 ", weight=" + weight +
                 '}';
     }

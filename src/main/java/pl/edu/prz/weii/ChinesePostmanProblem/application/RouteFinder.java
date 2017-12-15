@@ -3,8 +3,6 @@ package pl.edu.prz.weii.ChinesePostmanProblem.application;
 import org.jenetics.*;
 import org.jenetics.engine.Engine;
 import org.jenetics.engine.EvolutionResult;
-import org.jenetics.engine.EvolutionStatistics;
-import org.jenetics.stat.DoubleMomentStatistics;
 import pl.edu.prz.weii.ChinesePostmanProblem.domain.file.FileContent;
 import pl.edu.prz.weii.ChinesePostmanProblem.domain.graph.Edge;
 import pl.edu.prz.weii.ChinesePostmanProblem.domain.graph.Route;
@@ -21,12 +19,15 @@ public class RouteFinder {
     private Set<Integer> nodes = new HashSet<>();
     private double maxWeight = Double.MAX_VALUE;
 
-    private int populationSize = 1;
-    private long limitIterations = 100_000_000_000L;
-    private int limitSteady = 200_000_000;
-    private double probabilityOfMutation = 0.5;
+    private int startChromosomeLenght = 10;
+    private int populationSize = 100;
+    private long limitIterations = 1_000_000L;
+    private int limitSteady = 100_000;
+    private double probabilityOfMutation = 0.1;
 
-    private double prevScore = Double.MAX_VALUE;
+
+    private double prevBestScore = Double.MAX_VALUE;
+    private long startTime = -1;
 
     public RouteFinder(FileContent fileContent) {
         this.edges = fileContent.getEdges();
@@ -55,24 +56,22 @@ public class RouteFinder {
             score += (route.getNotVisitedEdges() * penalty);
             score += (route.getIncorrectEdges() * penalty);
             if (!route.isStartingAndEndingOnSameNode()) {
-                score += penalty;
+                score += penalty * 2;
             }
         }else {
-            System.err.print(route);
-        }
-        if(prevScore > score){
-            prevScore = score;
-            System.out.println(route);
+            long time = System.currentTimeMillis() - startTime;
+            if(prevBestScore > score){
+                prevBestScore = score;
+                System.out.println(time +"ms "+ score+ " " +route);
+            }
         }
         return score;
     }
 
     public Route findBest() {
-
-
-
+        startTime = System.currentTimeMillis();
         final Engine<IntegerGene, Double> engine = Engine
-                .builder(this::fitness, Route.code(this.nodes, this.edges))
+                .builder(this::fitness, Route.code(this.nodes, this.edges, startChromosomeLenght))
                 .minimizing()
                 .alterers(new RouteMutator<>(this.probabilityOfMutation, this.nodes.size()))
                 .offspringSelector(new TruncationSelector<>())
@@ -85,7 +84,7 @@ public class RouteFinder {
                 .limit(this.limitIterations)
                 .collect(EvolutionResult.toBestEvolutionResult());
         Genotype<IntegerGene> genotype = result.getBestPhenotype().getGenotype();
-        return Route.code(this.nodes, this.edges).decoder().apply(genotype);
+        return Route.code(this.nodes, this.edges, startChromosomeLenght).decoder().apply(genotype);
     }
 
 }

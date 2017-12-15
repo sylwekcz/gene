@@ -4,8 +4,9 @@ package pl.edu.prz.weii.ChinesePostmanProblem.domain.graph;
 import org.jenetics.util.Copyable;
 
 import java.io.Serializable;
+import java.util.Objects;
 
-public class Edge implements Serializable, Copyable<Edge> {
+public class Edge {
 
     private int nodeA;
     private int nodeB;
@@ -63,15 +64,13 @@ public class Edge implements Serializable, Copyable<Edge> {
         }
     }
 
-    public boolean equals(int nodeA, int nodeB) {
+    public Edge ifEqualsReturnCopyWithProperDirection(int nodeA, int nodeB) {
         if (this.nodeA == nodeA && this.nodeB == nodeB) {
-            this.AtoB = true;
-            return true;
+            return new Edge(this.nodeA, this.nodeB, weightFromAToB, weightFromBToA, true);
         } else if (this.nodeB == nodeA && this.nodeA == nodeB) {
-            this.AtoB = false;
-            return true;
+             return new Edge(this.nodeA, this.nodeB, weightFromAToB, weightFromBToA, false);
         }
-        return false;
+        return null;
     }
 
     public void printLikeFileLine() {
@@ -80,38 +79,20 @@ public class Edge implements Serializable, Copyable<Edge> {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
         Edge edge = (Edge) o;
-
-        if (nodeA != edge.nodeA) return false;
-        if (nodeB != edge.nodeB) return false;
-        if (Double.compare(edge.weightFromAToB, weightFromAToB) != 0) return false;
-        return Double.compare(edge.weightFromBToA, weightFromBToA) == 0;
+        return nodeA == edge.nodeA &&
+                nodeB == edge.nodeB;
     }
 
     @Override
     public int hashCode() {
-        int result;
-        long temp;
-        result = nodeA;
-        result = 31 * result + nodeB;
-        temp = Double.doubleToLongBits(weightFromAToB);
-        result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(weightFromBToA);
-        result = 31 * result + (int) (temp ^ (temp >>> 32));
-        return result;
-    }
 
-    @Override
-    public Edge copy() {
-        return new Edge(nodeA, nodeB, weightFromAToB, weightFromBToA, AtoB);
+        return Objects.hash(nodeA, nodeB);
     }
 
     @Override
     public String toString() {
-        String arrow = "%d -> %d";
-        return AtoB ? String.format(arrow, nodeA, nodeB) : String.format(arrow, nodeB, nodeA);
+        String arrow = "%d --(%.1f)-> %d";
+        return AtoB ? String.format(arrow,  nodeA, weightFromAToB, nodeB) : String.format(arrow, nodeB, weightFromBToA, nodeA);
     }
 }
