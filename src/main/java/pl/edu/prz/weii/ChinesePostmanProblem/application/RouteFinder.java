@@ -1,9 +1,10 @@
 package pl.edu.prz.weii.ChinesePostmanProblem.application;
 
-import org.jenetics.Genotype;
-import org.jenetics.IntegerGene;
+import org.jenetics.*;
 import org.jenetics.engine.Engine;
 import org.jenetics.engine.EvolutionResult;
+import org.jenetics.engine.EvolutionStatistics;
+import org.jenetics.stat.DoubleMomentStatistics;
 import pl.edu.prz.weii.ChinesePostmanProblem.domain.file.FileContent;
 import pl.edu.prz.weii.ChinesePostmanProblem.domain.graph.Edge;
 import pl.edu.prz.weii.ChinesePostmanProblem.domain.graph.Route;
@@ -20,10 +21,12 @@ public class RouteFinder {
     private Set<Integer> nodes = new HashSet<>();
     private double maxWeight = Double.MAX_VALUE;
 
-    private int populationSize = 10;
-    private long limitIterations = 5_000_000;
-    private int limitSteady = 50_000;
+    private int populationSize = 1;
+    private long limitIterations = 100_000_000_000L;
+    private int limitSteady = 200_000_000;
     private double probabilityOfMutation = 0.5;
+
+    private double prevScore = Double.MAX_VALUE;
 
     public RouteFinder(FileContent fileContent) {
         this.edges = fileContent.getEdges();
@@ -47,25 +50,34 @@ public class RouteFinder {
 
     public double fitness(final Route route) {
         double score = route.getWeight();
-        double penalty = maxWeight * 10;
+        double penalty = maxWeight * 100;
         if (!route.isValid()) {
             score += (route.getNotVisitedEdges() * penalty);
             score += (route.getIncorrectEdges() * penalty);
             if (!route.isStartingAndEndingOnSameNode()) {
                 score += penalty;
             }
-        } else {
+        }else {
+            System.err.print(route);
+        }
+        if(prevScore > score){
+            prevScore = score;
             System.out.println(route);
         }
         return score;
     }
 
     public Route findBest() {
+
+
+
         final Engine<IntegerGene, Double> engine = Engine
                 .builder(this::fitness, Route.code(this.nodes, this.edges))
                 .minimizing()
                 .alterers(new RouteMutator<>(this.probabilityOfMutation, this.nodes.size()))
+                .offspringSelector(new TruncationSelector<>())
                 .populationSize(this.populationSize)
+                .maximalPhenotypeAge(10)
                 .build();
 
         final EvolutionResult<IntegerGene, Double> result = engine.stream()

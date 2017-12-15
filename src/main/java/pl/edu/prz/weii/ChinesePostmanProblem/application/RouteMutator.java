@@ -75,12 +75,14 @@ public final class RouteMutator<
             shrinkProbability = 0.0;
             growProbability = 1.0;
         }
+
+        int penultimateGeneIndex = genes.size() - 2;
         if (rd < shrinkProbability) {
-            genes.remove(0);
+            genes.remove(penultimateGeneIndex);
         } else if (rd < growProbability) {
-            genes.add(genes.get(0).newInstance());
+            genes.add(penultimateGeneIndex, genes.get(0).newInstance());
         }
-        return (int) indexes(random, genes.size(), _probability)
+        return (int) indexes(random, 1, genes.size() - 1, _probability)
                 .peek(i -> genes.set(i, genes.get(i).newInstance()))
                 .count();
     }

@@ -70,7 +70,7 @@ public class GraphGenerator {
      * @param args
      */
     public static void main(String[] args) {
-        int vertexCount = 50;
+        int vertexCount = 10;
         List<Edge> edges = genGraph(vertexCount, 100, false,  () -> 1.0);
         System.out.println("Edges:");
         System.out.println(edges.size());

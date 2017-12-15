@@ -37,7 +37,7 @@ public class RouteFinderTest {
     @Test
     public void test2() throws IOException {
         List<String> lines = Files.lines(Paths.get("data")).collect(Collectors.toList());
-        RouteFinder routeFinder = new RouteFinder(new FileContent(lines), 50, Long.MAX_VALUE, 1_000_000, 0.5);
+        RouteFinder routeFinder = new RouteFinder(new FileContent(lines));
         Route best = routeFinder.findBest();
         System.out.println(best);
         System.out.println(routeFinder.fitness(best));

@@ -1,10 +1,8 @@
 package pl.edu.prz.weii.ChinesePostmanProblem.domain.graph;
 
-import org.jenetics.Genotype;
-import org.jenetics.IntegerChromosome;
-import org.jenetics.IntegerGene;
-import org.jenetics.NumericGene;
+import org.jenetics.*;
 import org.jenetics.engine.Codec;
+import org.jenetics.util.ISeq;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -37,9 +35,10 @@ public class Route {
         if (correctlyVisitedEdges.size() > 1) {
             Edge firstEdge = correctlyVisitedEdges.get(0);
             Edge lastEdge = correctlyVisitedEdges.get(correctlyVisitedEdges.size() - 1);
-            int firstNode = firstEdge.isAtoB() ? firstEdge.getNodeA() : firstEdge.getNodeB();
-            int lastNode = lastEdge.isAtoB() ? lastEdge.getNodeB() : lastEdge.getNodeA();
-            startingAndEndingOnSameNode = firstNode == lastNode;
+//            int firstNode = firstEdge.isAtoB() ? firstEdge.getNodeA() : firstEdge.getNodeB();
+//            int lastNode = lastEdge.isAtoB() ? lastEdge.getNodeB() : lastEdge.getNodeA();
+//            startingAndEndingOnSameNode = firstNode == lastNode;
+            startingAndEndingOnSameNode = visitedNodes.get(0) == visitedNodes.get(visitedNodes.size() - 1);
         }
         notVisitedEdges = edges.size() - new HashSet<>(correctlyVisitedEdges).size();
         valid = startingAndEndingOnSameNode && (notVisitedEdges == 0) && (incorrectEdges == 0);
@@ -57,8 +56,14 @@ public class Route {
 
     public static Codec<Route, IntegerGene> code(Set<Integer> nodes, Set<Edge> edges) {
         int min = nodes.stream().mapToInt(Integer::intValue).min().getAsInt();
+
+        IntegerChromosome randomChromosome = IntegerChromosome.of(min, nodes.size() + min - 1, nodes.size());
+        ISeq<IntegerGene> integerGenes = randomChromosome.toSeq();
+        ISeq<IntegerGene> integerGenesStartAndAndOnSame = integerGenes.append(integerGenes.get(0));
+        IntegerChromosome initChromosome = randomChromosome.newInstance(integerGenesStartAndAndOnSame);
+        System.out.println("code");
         return Codec.of(
-                Genotype.of(IntegerChromosome.of(min, nodes.size() + min - 1, nodes.size())),
+                Genotype.of(initChromosome),
                 gt -> new Route(gt, edges)
         );
     }
@@ -94,9 +99,7 @@ public class Route {
     @Override
     public String toString() {
         return "Route{" +
-                "visitedNodes=" + visitedNodes +
-                ", correctlyVisitedEdges=" + correctlyVisitedEdges +
-                ", incorrectEdges=" + incorrectEdges +
+                "incorrectEdges=" + incorrectEdges +
                 ", notVisitedEdges=" + notVisitedEdges +
                 ", startingAndEndingOnSameNode=" + startingAndEndingOnSameNode +
                 ", valid=" + valid +
