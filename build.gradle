@@ -30,6 +30,7 @@ ext {
 dependencies {
     compile('com.vaadin:vaadin-spring-boot-starter')
     compile('io.jenetics:jenetics:3.9.0')
+    compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
     compile group: 'com.google.guava', name: 'guava', version: '23.4-jre'
     runtime('org.springframework.boot:spring-boot-devtools')
     testCompile('org.springframework.boot:spring-boot-starter-test')

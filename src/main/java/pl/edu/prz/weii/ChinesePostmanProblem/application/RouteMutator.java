@@ -10,6 +10,7 @@ import org.jenetics.util.RandomRegistry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static org.jenetics.internal.math.random.indexes;
 
@@ -31,14 +32,13 @@ public final class RouteMutator<
             final Population<G, C> population,
             final long generation
     ) {
-        final double p = Math.pow(_probability, 1.0 / 3.0);
         final IntRef alterations = new IntRef(0);
 
-        indexes(RandomRegistry.getRandom(), population.size(), p).forEach(i -> {
+        indexes(RandomRegistry.getRandom(), population.size(), _probability).forEach(i -> {
             final Phenotype<G, C> pt = population.get(i);
 
             final Genotype<G> gt = pt.getGenotype();
-            final Genotype<G> mgt = mutate(gt, p, alterations);
+            final Genotype<G> mgt = mutate(gt, _probability, alterations);
 
             final Phenotype<G, C> mpt = pt.newInstance(mgt, generation);
             population.set(i, mpt);
@@ -58,10 +58,12 @@ public final class RouteMutator<
         // Add/remove Chromosome to Genotype.
         final Random random = RandomRegistry.getRandom();
         final double rd = random.nextDouble();
+
+        int randomPosition = ThreadLocalRandom.current().nextInt(0, genotype.length());
         if (rd < 1 / 3.0 && chromosomes.size() > 1) {
-            chromosomes.remove(0);
+            chromosomes.remove(randomPosition);
         } else if (rd < 2 / 3.0) {
-            chromosomes.add(chromosomes.get(0).newInstance());
+            chromosomes.add(randomPosition,chromosomes.get(0).newInstance());
         }
 
         alterations.value +=
@@ -75,7 +77,6 @@ public final class RouteMutator<
     private int mutate(final List<Chromosome<G>> c, final int i, final double p) {
         final Chromosome<G> chromosome = c.get(i);
         final List<G> genes = new ArrayList<>(chromosome.toSeq().asList());
-
         final int mutations = mutate(genes, p);
         if (mutations > 0) {
             c.set(i, chromosome.newInstance(ISeq.of(genes)));
@@ -88,10 +89,12 @@ public final class RouteMutator<
 
         // Add/remove Gene from chromosome.
         final double rd = random.nextDouble();
+
+        int randomPosition = ThreadLocalRandom.current().nextInt(0, genes.size());
         if (rd < 1 / 3.0) {
-            genes.remove(0);
+            genes.remove(randomPosition);
         } else if (rd < 2 / 3.0) {
-            genes.add(genes.get(0).newInstance());
+            genes.add(randomPosition,genes.get(randomPosition).newInstance());
         }
 
         return (int) indexes(random, genes.size(), p)
@@ -99,5 +102,10 @@ public final class RouteMutator<
                 .count();
     }
 
-
+    @Override
+    public String toString() {
+        return "RouteMutator[" +
+                "p=" + _probability +
+                ']';
+    }
 }

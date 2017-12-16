@@ -10,24 +10,31 @@ import java.util.Set;
 
 public class Route {
 
-    private List<Integer> visitedNodes;
-    private List<Edge> correctlyVisitedEdges;
+    private boolean valid;
+    private double weight;
     private int incorrectEdges;
     private int notVisitedEdges;
     private boolean startingAndEndingOnSameNode;
-    private double weight;
-    private boolean valid;
+    private List<Integer> visitedNodes;
+    private List<Edge> correctlyVisitedEdges;
 
 
     private Route(Genotype<IntegerGene> gt, Set<Edge> edges) {
         visitedNodes = new ArrayList<>();
         correctlyVisitedEdges = new ArrayList<>();
         incorrectEdges = 0;
-        gt.iterator().forEachRemaining(chromosome -> chromosome.iterator().forEachRemaining(
-                gene -> {
-                    visitedNodes.add(gene.intValue());
+
+//        int genes = gt.getNumberOfGenes();
+//        int chromosomes = gt.length();
+//        System.out.println(chromosomes + " " + genes);
+        gt.iterator().forEachRemaining(chromosome -> {
+                    chromosome.iterator().forEachRemaining(
+                            gene -> {
+                                visitedNodes.add(gene.intValue());
+                            }
+                    );
                 }
-        ));
+        );
         for (int i = 1; i < visitedNodes.size(); ++i) {
             Edge edge = findEdge(edges, visitedNodes.get(i - 1), visitedNodes.get(i));
             if (edge != null) {
@@ -44,7 +51,7 @@ public class Route {
             startingAndEndingOnSameNode = firstNode == lastNode;
         }
         HashSet<Edge> edges1 = new HashSet<>(correctlyVisitedEdges);
-             notVisitedEdges =  edges.size() -  new HashSet<>(correctlyVisitedEdges).size();
+        notVisitedEdges = edges.size() - new HashSet<>(correctlyVisitedEdges).size();
         valid = startingAndEndingOnSameNode && (notVisitedEdges == 0) && (incorrectEdges == 0);
         weight = correctlyVisitedEdges.stream().mapToDouble(Edge::getWeight).sum();
     }
@@ -64,7 +71,7 @@ public class Route {
         IntegerChromosome randomChromosome = IntegerChromosome.of(min, nodes.size() + min - 1, chromosomeLength);
         List<IntegerChromosome> chromosomes = new ArrayList<>();
         chromosomes.add(randomChromosome);
-        for (int i = 1; i <chromosomesCount ; i++) {
+        for (int i = 1; i < chromosomesCount; i++) {
             chromosomes.add(randomChromosome);
         }
         return Codec.of(
@@ -105,12 +112,12 @@ public class Route {
     public String toString() {
         return "Route{" +
                 "valid=" + valid +
-                ", visitedNodes=" + visitedNodes +
-                ", correctlyVisitedEdges=" + correctlyVisitedEdges +
+                ", weight=" + weight +
                 ", incorrectEdges=" + incorrectEdges +
                 ", notVisitedEdges=" + notVisitedEdges +
                 ", startingAndEndingOnSameNode=" + startingAndEndingOnSameNode +
-                ", weight=" + weight +
+                ", visitedNodes=" + visitedNodes +
+                ", correctlyVisitedEdges=" + correctlyVisitedEdges +
                 '}';
     }
 }
