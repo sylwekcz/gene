@@ -1,6 +1,9 @@
 package pl.edu.prz.weii.ChinesePostmanProblem.application;
 
-import org.jenetics.*;
+import org.jenetics.Genotype;
+import org.jenetics.IntegerGene;
+import org.jenetics.RouletteWheelSelector;
+import org.jenetics.SinglePointCrossover;
 import org.jenetics.engine.Engine;
 import org.jenetics.engine.EvolutionResult;
 import pl.edu.prz.weii.ChinesePostmanProblem.domain.file.FileContent;
@@ -84,10 +87,14 @@ public class RouteFinder {
                 score += penalty * 2;
             }
         }
+        if (prevBestScore > score) {
+            prevBestScore = score;
+            System.out.println(route);
+        }
         return score;
     }
 
-    private void toFile(Route route){
+    private void toFile(Route route) {
         long time = System.currentTimeMillis() - startTime;
         StringJoiner stringJoiner = new StringJoiner(";");
         stringJoiner

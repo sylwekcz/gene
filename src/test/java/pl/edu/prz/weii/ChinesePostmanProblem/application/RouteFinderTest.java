@@ -1,5 +1,6 @@
 package pl.edu.prz.weii.ChinesePostmanProblem.application;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import pl.edu.prz.weii.ChinesePostmanProblem.domain.file.FileContent;
 import pl.edu.prz.weii.ChinesePostmanProblem.domain.graph.Edge;
@@ -25,6 +26,7 @@ public class RouteFinderTest {
     ));
 
     @Test
+    @Ignore
     public void test() {
         RouteFinder routeFinder = new RouteFinder(fileContent, 100,
                 10, 22, 100, 0.1, 0.1, false);
@@ -36,6 +38,7 @@ public class RouteFinderTest {
 
 
     @Test
+    @Ignore
     public void decompose() throws IOException {
         List<String> lines = Files.lines(Paths.get("nodes-20-edges-44")).collect(Collectors.toList());
         FileContent fileContent = new FileContent(lines);
@@ -87,6 +90,7 @@ public class RouteFinderTest {
 
 
     @Test
+    @Ignore
     public void test1() throws IOException {
         testSingle(100,100, 0.1, 0.1, false);
         testSingle(100,100, 0.01, 0.1, false);
