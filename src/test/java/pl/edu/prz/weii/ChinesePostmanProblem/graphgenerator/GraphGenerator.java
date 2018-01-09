@@ -9,7 +9,6 @@ import java.util.function.Supplier;
 
 public class GraphGenerator {
 
-    private int vertexCount;
 
     public static List<Edge> genGraph(int vertexCount, int saturation, boolean euler, Supplier<Double> weightSupplier) {
         double result[][] = new double[vertexCount][vertexCount];
@@ -70,8 +69,8 @@ public class GraphGenerator {
      * @param args
      */
     public static void main(String[] args) {
-        int vertexCount = 20;
-        List<Edge> edges = genGraph(vertexCount, 20, false,  GraphGenerator::generateDoubleBetween1and10);
+        int vertexCount = 40;
+        List<Edge> edges = genGraph(vertexCount, 100, true,  GraphGenerator::generateDoubleBetween1and10);
         System.out.println("Edges:");
         System.out.println(edges.size());
         edges.forEach(Edge::printLikeFileLine);
